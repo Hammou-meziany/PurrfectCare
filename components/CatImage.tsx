@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { PawPrint } from 'lucide-react';
 
 interface CatImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -11,6 +11,16 @@ interface CatImageProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 export const CatImage: React.FC<CatImageProps> = ({ src, alt, className = "", overlayText, ...props }) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [hasError, setHasError] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    // Check if image is already loaded (from cache) when component mounts
+    if (imgRef.current && imgRef.current.complete) {
+      if (imgRef.current.naturalWidth > 0) {
+        setIsLoaded(true);
+      }
+    }
+  }, []);
 
   return (
     <div className={`relative overflow-hidden bg-primary-100 ${className}`}>
@@ -23,6 +33,7 @@ export const CatImage: React.FC<CatImageProps> = ({ src, alt, className = "", ov
 
       {/* Actual Image */}
       <img
+        ref={imgRef}
         src={src}
         alt={alt}
         className={`w-full h-full object-cover transition-opacity duration-700 ease-in-out ${

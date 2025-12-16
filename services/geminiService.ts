@@ -1,8 +1,19 @@
 import { GoogleGenAI } from "@google/genai";
 
+const getApiKey = (): string => {
+  try {
+    // Check if process is defined to avoid ReferenceError in some browser environments (like Vite)
+    if (typeof process !== 'undefined' && process.env) {
+      return process.env.API_KEY || '';
+    }
+  } catch (e) {
+    // Ignore errors accessing process
+  }
+  return '';
+};
+
 const getClient = () => {
-  // Safe initialization, assumes process.env.API_KEY is available
-  const apiKey = process.env.API_KEY || '';
+  const apiKey = getApiKey();
   if (!apiKey) {
     console.warn("API Key is missing. Gemini features will not work.");
   }
@@ -11,9 +22,11 @@ const getClient = () => {
 
 export const generateCatContent = async (topic: string, type: 'blog' | 'advice'): Promise<string> => {
   try {
-    const ai = getClient();
-    if (!process.env.API_KEY) return "Please configure your API Key to use AI features.";
+    const apiKey = getApiKey();
+    if (!apiKey) return "Please configure your API Key to use AI features.";
 
+    const ai = getClient();
+    
     let prompt = "";
     if (type === 'blog') {
       prompt = `Write a short, engaging, SEO-optimized blog post section (approx 150 words) about: "${topic}" for a cat care website. Use a friendly, knowledgeable tone.`;
